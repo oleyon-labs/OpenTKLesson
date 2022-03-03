@@ -312,6 +312,8 @@ static public class Program
         }
         return new ShaderProgram() { id = shaderProgramId };
     }
+
+    
     
     public struct Shader
     {
@@ -322,6 +324,7 @@ static public class Program
     {
         public int id;
     }
+    
 }
 //public sealed class MainWindow : GameWindow
 //{
