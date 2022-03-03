@@ -5,10 +5,19 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Common;
 using System.Diagnostics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
+using System;
+using System.Collections.Generic;
+using OpenTK.Graphics.OpenGL4;
+
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 namespace MyApp;
 
-static class Program
+static public class Program
 {
     public static void Main(string[] args)
     {
@@ -62,10 +71,10 @@ static class Program
         float[] verts = { -0.5f, -0.5f, 0, 0.5f, -0.5f, 0, 0, 0.5f, 0 };
 
         float[] verts2 = {
-             0.5f,  0.5f, 0.0f,  // Верхний правый угол
-             0.5f, -0.5f, 0.0f,  // Нижний правый угол
-            -0.5f, -0.5f, 0.0f,  // Нижний левый угол
-            -0.5f,  0.5f, 0.0f   // Верхний левый угол
+             0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // Верхний правый угол
+             0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // Нижний правый угол
+            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,  // Нижний левый угол
+            -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f   // Верхний левый угол
         };
         float[] verts3 = {
             // Позиции         // Цвета
@@ -86,7 +95,7 @@ static class Program
         int ebo = 0;
         Random random = new Random();
         window.Load += () => {
-            shaderProgram = LoadShaderProgram("F:/Programms/OpenTKLesson/OpenTKLesson/vertex_shader3.glsl", "F:/Programms/OpenTKLesson/OpenTKLesson/fragment_shader3.glsl");
+            shaderProgram = LoadShaderProgram("../../../vertex_shader3.glsl", "../../../fragment_shader3.glsl");
 
 
 
@@ -121,6 +130,24 @@ static class Program
             //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+            Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>("C:/Users/oley/Source/Repos/OpenTKLesson/OpenTKLesson/Textures/container.jpg");
+
+            var pixels = new List<byte>(4 * image.Width * image.Height);
+
+            //for (int y = 0; y < image.Height; y++)
+            //{
+            //    var row = image.GetPixelRowSpan(y);
+
+            //    for (int x = 0; x < image.Width; x++)
+            //    {
+            //        pixels.Add(row[x].R);
+            //        pixels.Add(row[x].G);
+            //        pixels.Add(row[x].B);
+            //        pixels.Add(row[x].A);
+            //    }
+            //}
+
         };
         int frame = 0;
 
@@ -136,9 +163,9 @@ static class Program
             //int vao = GL.GenVertexArray();
             //int vertices = GL.GenBuffer();
 
-            verts3[0] = (float)random.NextDouble();
+            //verts3[0] = (float)random.NextDouble();
             GL.BindVertexArray(vao);
-            verts3[0] = (float)random.NextDouble();
+            //verts3[0] = (float)random.NextDouble();
             //GL.BindBuffer(BufferTarget.ArrayBuffer, vertices);
             //GL.BufferData(BufferTarget.ArrayBuffer, 36, verts, BufferUsageHint.StaticDraw);
             //GL.EnableVertexAttribArray(0);
@@ -152,7 +179,7 @@ static class Program
             int vertexColorLocation = GL.GetUniformLocation(shaderProgram.id, "outerColor");
             GL.Uniform4(vertexColorLocation, 0.0f, val2, val, 0.0f);
 
-            GL.DrawElements(BeginMode.Triangles, 9, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(BeginMode.Triangles, 6, DrawElementsType.UnsignedInt, 0);
 
             //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindVertexArray(0);
@@ -249,7 +276,7 @@ static class Program
     {
 
     }
-    private static Shader LoadShader(string shaderLocation, ShaderType shaderType)
+    public static Shader LoadShader(string shaderLocation, ShaderType shaderType)
     {
         int shaderId = GL.CreateShader(shaderType);
         GL.ShaderSource(shaderId, File.ReadAllText(shaderLocation));
@@ -262,7 +289,7 @@ static class Program
         return new Shader() { id = shaderId };
     }
 
-    private static ShaderProgram LoadShaderProgram(string vertexShaderLocation, string fragmentShaderLocation)
+    public static ShaderProgram LoadShaderProgram(string vertexShaderLocation, string fragmentShaderLocation)
     {
         int shaderProgramId = GL.CreateProgram();
         Shader vertexShader = LoadShader(vertexShaderLocation, ShaderType.VertexShader);
