@@ -1,20 +1,10 @@
-﻿using OpenTK;
-using OpenTK.Graphics.OpenGL4;
-using OpenTK.Graphics;
+﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Common;
-using System.Diagnostics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using OpenTKExtension;
 
-using System;
-using System.Collections.Generic;
-using OpenTK.Graphics.OpenGL4;
-
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 namespace MyApp;
 
 static public class Program
@@ -65,7 +55,7 @@ static public class Program
         //    Console.WriteLine(frameCount);
         //    frameCount++;
         //};
-        ShaderProgram shaderProgram = new ShaderProgram() {id=0};
+        ShaderProgram shaderProgram = null;
 
 
         float[] verts = { -0.5f, -0.5f, 0, 0.5f, -0.5f, 0, 0, 0.5f, 0 };
@@ -77,10 +67,10 @@ static public class Program
             -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f   // Верхний левый угол
         };
         float[] verts3 = {
-            // Позиции         // Цвета
-             0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // Нижний правый угол
-            -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // Нижний левый угол
-             0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // Верхний угол
+            // Позиции         // Цвета           // координаты текстуры
+             0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,   // Нижний правый угол
+            -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,  // Нижний левый угол
+             0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.5f, 1.0f    // Верхний угол
         };
         uint[] indices = {  // Помните, что мы начинаем с 0!
             0, 1, 3,   // Первый треугольник
@@ -93,243 +83,115 @@ static public class Program
         int vao = 0;
         int vertices = 0;
         int ebo = 0;
+
+        int[] textures = { 0, 0 };
+        
         Random random = new Random();
+
+        Directory.SetCurrentDirectory("../../../../");
+        Console.WriteLine(Directory.GetCurrentDirectory());
+
         window.Load += () => {
-            shaderProgram = LoadShaderProgram("../../../vertex_shader3.glsl", "../../../fragment_shader3.glsl");
+            shaderProgram = ShaderProgram.LoadShaderProgram("vertex_shader3.glsl", "fragment_shader3.glsl");
 
-
-
-            //debug triangle
+            
             vao = GL.GenVertexArray();
             vertices = GL.GenBuffer();
             ebo = GL.GenBuffer();
             GL.BindVertexArray(vao);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
-            //GL.BufferData(BufferTarget.ElementArrayBuffer, 4*3*2, indices, BufferUsageHint.StaticDraw);
+            
             GL.BufferData(BufferTarget.ElementArrayBuffer, 4 * 3 * 1, indices3, BufferUsageHint.StaticDraw);
-            //verts3[4] = (float)random.NextDouble();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertices);
-            //GL.BufferData(BufferTarget.ArrayBuffer, 36, verts, BufferUsageHint.StaticDraw);
-            //GL.BufferData(BufferTarget.ArrayBuffer, 4*3*4, verts2, BufferUsageHint.StaticDraw);
-            GL.BufferData(BufferTarget.ArrayBuffer, 4 * 6 * 3, verts3, BufferUsageHint.StaticDraw);
 
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * 4, 0);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertices);
+
+            GL.BufferData(BufferTarget.ArrayBuffer, 4 * (3+3+2) * 3, verts3, BufferUsageHint.StaticDraw);
+
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (3+3+2) * 4, 0);
             GL.EnableVertexAttribArray(0);
 
-            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * 4, 3 * 4);
+            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (3 + 3 + 2) * 4, 3 * 4);
             GL.EnableVertexAttribArray(1);
 
+            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (3 + 3 + 2) * 4, (3 + 3) * 4);
+            GL.EnableVertexAttribArray(2);
 
-            //GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindVertexArray(0);
-            //GL.DeleteVertexArray(vao);
-            //GL.DeleteBuffer(vertices);//??
-            //GL.DeleteBuffer(ebo);//??
-            //GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-            Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>("C:/Users/oley/Source/Repos/OpenTKLesson/OpenTKLesson/Textures/container.jpg");
+            #region textureGeneration
 
-            var pixels = new List<byte>(4 * image.Width * image.Height);
 
-            //for (int y = 0; y < image.Height; y++)
-            //{
-            //    var row = image.GetPixelRowSpan(y);
+            textures[0] = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, textures[0]);
 
-            //    for (int x = 0; x < image.Width; x++)
-            //    {
-            //        pixels.Add(row[x].R);
-            //        pixels.Add(row[x].G);
-            //        pixels.Add(row[x].B);
-            //        pixels.Add(row[x].A);
-            //    }
-            //}
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+            Texture texture1 = new Texture("Textures/container.jpg");
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, texture1.Width, texture1.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texture1.PixelData);
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+
+
+
+
+            textures[1] = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, textures[1]);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+            Texture texture2 = new Texture("Textures/awesomeface.png");
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, texture2.Width, texture2.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texture2.PixelData);
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            #endregion
 
         };
         int frame = 0;
 
         window.RenderFrame += (FrameEventArgs frameEventArgs) =>
         {
-            GL.UseProgram(shaderProgram.id);
+            GL.UseProgram(shaderProgram.Id);
             GL.ClearColor(0.3f, 0.3f, 0.3f, 0);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            //debug triangle
-            //float[] verts = { -0.5f, -0.5f, 0, 0.5f, -0.5f, 0, 0, 0.5f, 0 };
 
-            //int vao = GL.GenVertexArray();
-            //int vertices = GL.GenBuffer();
-
-            //verts3[0] = (float)random.NextDouble();
             GL.BindVertexArray(vao);
-            //verts3[0] = (float)random.NextDouble();
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, vertices);
-            //GL.BufferData(BufferTarget.ArrayBuffer, 36, verts, BufferUsageHint.StaticDraw);
-            //GL.EnableVertexAttribArray(0);
-            //GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
 
-            //GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, textures[0]);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram.Id, "ourTexture1"), 0);
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, textures[1]);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram.Id, "ourTexture2"), 1);
 
 
-            float val =/*(float)Math.Sin(frame/60.0)/2f+0.5f;*/ (float)(Math.Sin(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
+
+
+            float val = (float)(Math.Sin(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
             float val2 = (float)(Math.Cos(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
-            int vertexColorLocation = GL.GetUniformLocation(shaderProgram.id, "outerColor");
+            int vertexColorLocation = GL.GetUniformLocation(shaderProgram.Id, "outerColor");
             GL.Uniform4(vertexColorLocation, 0.0f, val2, val, 0.0f);
 
-            GL.DrawElements(BeginMode.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(BeginMode.Triangles, 3, DrawElementsType.UnsignedInt, 0);
 
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+
             GL.BindVertexArray(0);
-            //GL.DeleteVertexArray(vao);
-            //GL.DeleteBuffer(vertices);
-            //debug triangle
 
+            GL.BindTexture(TextureTarget.Texture2D, 0);
 
             Console.WriteLine($"{frame++}, {val}");
             window.SwapBuffers();
         };
 
-        //window.RenderFrame += (FrameEventArgs frameEventArgs) =>
-        //{
-        //    GL.UseProgram(shaderProgram.id);
-        //    GL.ClearColor(0.3f, 0.3f, 0.3f, 0);
-        //    GL.Clear(ClearBufferMask.ColorBufferBit);
-
-        //    //debug triangle
-        //    //float[] verts = { -0.5f, -0.5f, 0, 0.5f, -0.5f, 0, 0, 0.5f, 0 };
-
-        //    //int vao = GL.GenVertexArray();
-        //    //int vertices = GL.GenBuffer();
-
-
-
-
-        //    //debug triangle
-        //    vao = GL.GenVertexArray();
-        //    vertices = GL.GenBuffer();
-        //    ebo = GL.GenBuffer();
-        //    GL.BindVertexArray(vao);
-        //    GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
-        //    //GL.BufferData(BufferTarget.ElementArrayBuffer, 4*3*2, indices, BufferUsageHint.StaticDraw);
-        //    GL.BufferData(BufferTarget.ElementArrayBuffer, 4 * 3 * 1, indices3, BufferUsageHint.StaticDraw);
-        //    //verts3[4] = (float)random.NextDouble();
-        //    GL.BindBuffer(BufferTarget.ArrayBuffer, vertices);
-        //    //GL.BufferData(BufferTarget.ArrayBuffer, 36, verts, BufferUsageHint.StaticDraw);
-        //    //GL.BufferData(BufferTarget.ArrayBuffer, 4*3*4, verts2, BufferUsageHint.StaticDraw);
-        //    GL.BufferData(BufferTarget.ArrayBuffer, 4 * 6 * 3, verts3, BufferUsageHint.StaticDraw);
-        //    verts3[4] = (float)random.NextDouble();
-
-        //    GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * 4, 0);
-        //    GL.EnableVertexAttribArray(0);
-
-        //    GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * 4, 3 * 4);
-        //    GL.EnableVertexAttribArray(1);
-
-        //    GL.DrawElements(BeginMode.Triangles, 9, DrawElementsType.UnsignedInt, 0);
-        //    GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-        //    GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        //    GL.BindVertexArray(0);
-        //    GL.DeleteVertexArray(vao);
-        //    GL.DeleteBuffer(ebo);
-        //    GL.DeleteBuffer(vertices);
-
-
-
-
-
-
-        //    //GL.BindBuffer(BufferTarget.ArrayBuffer, vertices);
-        //    //GL.BufferData(BufferTarget.ArrayBuffer, 36, verts, BufferUsageHint.StaticDraw);
-        //    //GL.EnableVertexAttribArray(0);
-        //    //GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
-
-        //    //GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-
-
-        //    float val =/*(float)Math.Sin(frame/60.0)/2f+0.5f;*/ (float)(Math.Sin(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
-        //    float val2 = (float)(Math.Cos(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
-        //    int vertexColorLocation = GL.GetUniformLocation(shaderProgram.id, "outerColor");
-        //    GL.Uniform4(vertexColorLocation, 0.0f, val2, val, 0.0f);
-
-
-
-        //    //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        //    //GL.BindVertexArray(0);
-        //    //GL.DeleteVertexArray(vao);
-        //    //GL.DeleteBuffer(vertices);
-        //    //debug triangle
-
-
-        //    Console.WriteLine($"{frame++}, {val}");
-        //    window.SwapBuffers();
-        //};
-
-
         window.Run();
 
     }
-
-    private static void LoadImage(string Path)
-    {
-
-    }
-    public static Shader LoadShader(string shaderLocation, ShaderType shaderType)
-    {
-        int shaderId = GL.CreateShader(shaderType);
-        GL.ShaderSource(shaderId, File.ReadAllText(shaderLocation));
-        GL.CompileShader(shaderId);
-        string infoLog = GL.GetShaderInfoLog(shaderId);
-        if(!string.IsNullOrEmpty(infoLog))
-        {
-            throw new Exception(infoLog);
-        }
-        return new Shader() { id = shaderId };
-    }
-
-    public static ShaderProgram LoadShaderProgram(string vertexShaderLocation, string fragmentShaderLocation)
-    {
-        int shaderProgramId = GL.CreateProgram();
-        Shader vertexShader = LoadShader(vertexShaderLocation, ShaderType.VertexShader);
-        Shader fragmentShader = LoadShader(fragmentShaderLocation, ShaderType.FragmentShader);
-        GL.AttachShader(shaderProgramId, vertexShader.id);
-        GL.AttachShader(shaderProgramId, fragmentShader.id);
-        GL.LinkProgram(shaderProgramId);
-        GL.DetachShader(shaderProgramId, vertexShader.id);
-        GL.DetachShader(shaderProgramId, fragmentShader.id);
-        GL.DeleteShader(vertexShader.id);
-        GL.DeleteShader(fragmentShader.id);
-
-        string infoLog = GL.GetProgramInfoLog(shaderProgramId);
-
-        
-
-        if (!string.IsNullOrEmpty(infoLog))
-        {
-            throw new Exception(infoLog);
-        }
-        return new ShaderProgram() { id = shaderProgramId };
-    }
-
-    
-    
-    public struct Shader
-    {
-        public int id;
-    }
-
-    public struct ShaderProgram
-    {
-        public int id;
-    }
-    
 }
-//public sealed class MainWindow : GameWindow
-//{
-//    public MainWindow() : base()
-//    {
-//        Title += ": OpenGL Version: " + GL.GetString(StringName.Version);
-//    }
-//}

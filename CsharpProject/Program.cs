@@ -6,6 +6,7 @@ using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Common;
 using static MyApp.Program;
 using OpenTK.Mathematics;
+using OpenTKExtension;
 
 namespace Praktika;
 
@@ -54,8 +55,7 @@ class Program
 
         ShaderProgram[] shaderPrograms =
         {
-            new ShaderProgram(),
-            new ShaderProgram()
+            null, null
         };
 
         //ShaderProgram shaderProgram = new ShaderProgram();
@@ -63,8 +63,9 @@ class Program
 
         window.Load += () =>
         {
-            shaderPrograms[0] = MyApp.Program.LoadShaderProgram("C:/Users/oley/source/repos/OpenTKLesson/CsharpProject/VS.glsl", "C:/Users/oley/source/repos/OpenTKLesson/CsharpProject/FS.glsl");
-            shaderPrograms[1] = MyApp.Program.LoadShaderProgram("C:/Users/oley/source/repos/OpenTKLesson/CsharpProject/VS.glsl", "C:/Users/oley/source/repos/OpenTKLesson/CsharpProject/FS2.glsl");
+            //Console.WriteLine(Directory.GetCurrentDirectory());
+            shaderPrograms[0] = ShaderProgram.LoadShaderProgram("../../../VS.glsl", "../../../FS.glsl");
+            shaderPrograms[1] = ShaderProgram.LoadShaderProgram("../../../VS.glsl", "../../../FS2.glsl");
 
 
 
@@ -154,11 +155,11 @@ class Program
             Matrix4.CreateRotationZ(val3, out model);
 
 
-            GL.UseProgram(shaderPrograms[0].id);
+            GL.UseProgram(shaderPrograms[0].Id);
             GL.BindVertexArray(VAOs[3]);
 
 
-            int matrixLocation = GL.GetUniformLocation(shaderPrograms[0].id, "model");
+            int matrixLocation = GL.GetUniformLocation(shaderPrograms[0].Id, "model");
             GL.UniformMatrix4(matrixLocation, false, ref model);
 
             //for (int i = 0; i < VAOs.Length; i++)
