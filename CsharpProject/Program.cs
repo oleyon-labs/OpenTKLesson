@@ -15,6 +15,10 @@ class Program
 {
     static void Main(string[] args)
     {
+        Directory.SetCurrentDirectory("../../../");
+        Console.WriteLine(Directory.GetCurrentDirectory());
+
+
         GameWindowSettings gws = GameWindowSettings.Default;
         NativeWindowSettings nws = NativeWindowSettings.Default;
         //nws.APIVersion = new(4, 6);
@@ -23,7 +27,7 @@ class Program
         gws.UpdateFrequency = 60;
 
         nws.APIVersion = new(4, 1);
-        nws.Size = new(640, 480);
+        nws.Size = new(1024, 720);
         nws.Title = "Hello triangle";
         GameWindow window = new GameWindow(gws, nws);
 
@@ -49,8 +53,8 @@ class Program
         -0.5f, 0.5f, 0.0f
         };
 
-        int[] VBOs = new int[4];
-        int[] VAOs = new int[4];
+        int[] VBOs = new int[10];
+        int[] VAOs = new int[10];
 
 
         ShaderProgram[] shaderPrograms =
@@ -59,16 +63,35 @@ class Program
         };
 
         //ShaderProgram shaderProgram = new ShaderProgram();
-        
+
+
+        int[] EBOs = new int[10];
+
+        int[] textures = { 0, 0 };
+
+
+
+
+
+        float[] rectangleTextured = {
+             // Позиции          // Цвета           // координаты текстуры
+             0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // Верхний правый угол
+             0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // Нижний правый угол
+            -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,  // Нижний левый угол
+            -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f   // Верхний левый угол
+        };
+
+        uint[] indices = {  // Помните, что мы начинаем с 0!
+            0, 1, 3,   // Первый треугольник
+            1, 2, 3    // Второй треугольник
+        };
 
         window.Load += () =>
         {
-            //Console.WriteLine(Directory.GetCurrentDirectory());
-            shaderPrograms[0] = ShaderProgram.LoadShaderProgram("../../../VS.glsl", "../../../FS.glsl");
-            shaderPrograms[1] = ShaderProgram.LoadShaderProgram("../../../VS.glsl", "../../../FS2.glsl");
+            shaderPrograms[0] = ShaderProgram.LoadShaderProgram("vertex_shader3.glsl", "fragment_shader3.glsl");
+            shaderPrograms[1] = ShaderProgram.LoadShaderProgram("VS.glsl", "FS2.glsl");
 
-
-
+            #region старые треугольники
             VAOs[0] = GL.GenVertexArray();
             VBOs[0] = GL.GenBuffer();
             GL.BindVertexArray(VAOs[0]);
@@ -130,58 +153,103 @@ class Program
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindVertexArray(0);
+            #endregion
 
+            #region прямоугольник с текстурой
+
+            VAOs[5] = GL.GenVertexArray();
+            VBOs[5] = GL.GenBuffer();
+            EBOs[5] = GL.GenBuffer();
+            GL.BindVertexArray(VAOs[5]);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBOs[5]);
+
+            GL.BufferData(BufferTarget.ElementArrayBuffer, 4 * 3 * 2, indices, BufferUsageHint.StaticDraw);
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, VBOs[5]);
+
+            GL.BufferData(BufferTarget.ArrayBuffer, 4 * (3 + 3 + 2) * 4, rectangleTextured, BufferUsageHint.StaticDraw);
+
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (3 + 3 + 2) * 4, 0);
+            GL.EnableVertexAttribArray(0);
+
+            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (3 + 3 + 2) * 4, 3 * 4);
+            GL.EnableVertexAttribArray(1);
+
+            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (3 + 3 + 2) * 4, (3 + 3) * 4);
+            GL.EnableVertexAttribArray(2);
+
+            GL.BindVertexArray(0);
+            #endregion
+
+            #region создание текстур
+
+
+            textures[0] = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, textures[0]);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+            Texture texture1 = new Texture("Textures/texture.png");
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, texture1.Width, texture1.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texture1.PixelData);
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+
+
+
+
+            textures[1] = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, textures[1]);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+            Texture texture2 = new Texture("Textures/texture1.jpg");
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, texture2.Width, texture2.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texture2.PixelData);
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            #endregion
         };
 
         window.RenderFrame += (FrameEventArgs frameEventArgs) =>
         {
-            //GL.UseProgram(shaderProgram.id);
             GL.ClearColor(0.3f, 0.2f, 0.5f, 0);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            //float val =/*(float)Math.Sin(frame/60.0)/2f+0.5f;*/ (float)(Math.Sin(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
-            //float val2 = (float)(Math.Cos(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
-            //int vertexColorLocation = GL.GetUniformLocation(shaderProgram.id, "ourColor");
-            //GL.Uniform4(vertexColorLocation, 0.0f, val2, val, 0.0f);
+            GL.UseProgram(shaderPrograms[0].Id);
+            GL.BindVertexArray(VAOs[5]);
 
+            #region трансформации
             Matrix4 model = Matrix4.Identity;
             Vector3 vector3 = new Vector3(0.3f, -0.3f, 0.0f);
             Matrix4.CreateTranslation(in vector3, out model);
 
-            float val4;
-            val4 = (float)(DateTime.Now.Ticks % 100000);
-            float val3 =/*(float)Math.Sin(frame/60.0)/2f+0.5f;*/ (float)(Math.Sin(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
-            Console.WriteLine(val4);
+            float val3 =(float)Math.Sin(GetTimeInFloat())/2f+0.5f;
+            
             Matrix4.CreateRotationZ(val3, out model);
-
-
-            GL.UseProgram(shaderPrograms[0].Id);
-            GL.BindVertexArray(VAOs[3]);
-
 
             int matrixLocation = GL.GetUniformLocation(shaderPrograms[0].Id, "model");
             GL.UniformMatrix4(matrixLocation, false, ref model);
+            #endregion
 
-            //for (int i = 0; i < VAOs.Length; i++)
-            //{
-            //    GL.UseProgram(shaderPrograms[i].id);
+            #region текстуры
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, textures[0]);
+            GL.Uniform1(GL.GetUniformLocation(shaderPrograms[0].Id, "ourTexture1"), 0);
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, textures[1]);
+            GL.Uniform1(GL.GetUniformLocation(shaderPrograms[0].Id, "ourTexture2"), 1);
 
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            #endregion
 
-            //    float val =/*(float)Math.Sin(frame/60.0)/2f+0.5f;*/ (float)(Math.Sin(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
-            //    float val2 = (float)(Math.Cos(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
-            //    int vertexColorLocation = GL.GetUniformLocation(shaderPrograms[i].id, "ourColor");
-            //    GL.Uniform4(vertexColorLocation, 0.0f, val2, val, 0.0f);
-
-
-
-
-            //    GL.BindVertexArray(VAOs[i]);
-
-            //    GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-            //}
-
-
+            GL.DrawElements(BeginMode.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+            //GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
 
             GL.BindVertexArray(0);
 
@@ -191,5 +259,10 @@ class Program
 
         window.Run();
         
+    }
+    public static double GetTimeInFloat()
+    {
+        var time = DateTime.Now;
+        return (double)((time.Minute*60 + time.Second) * 1000 + time.Millisecond) / 1000.0;
     }
 }

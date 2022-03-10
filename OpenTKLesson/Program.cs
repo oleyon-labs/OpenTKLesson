@@ -88,7 +88,7 @@ static public class Program
         
         Random random = new Random();
 
-        Directory.SetCurrentDirectory("../../../../");
+        Directory.SetCurrentDirectory("../../../");
         Console.WriteLine(Directory.GetCurrentDirectory());
 
         window.Load += () => {
