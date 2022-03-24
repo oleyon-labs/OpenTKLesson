@@ -4,6 +4,7 @@ using OpenTK.Windowing.Common;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using OpenTKExtension;
+using OpenTK.Mathematics;
 
 namespace MyApp;
 
@@ -55,7 +56,7 @@ static public class Program
         //    Console.WriteLine(frameCount);
         //    frameCount++;
         //};
-        ShaderProgram shaderProgram = null;
+        _ShaderProgram shaderProgram = null;
 
 
         float[] verts = { -0.5f, -0.5f, 0, 0.5f, -0.5f, 0, 0, 0.5f, 0 };
@@ -88,11 +89,11 @@ static public class Program
         
         Random random = new Random();
 
-        Directory.SetCurrentDirectory("../../../");
+        Directory.SetCurrentDirectory("../../../../");
         Console.WriteLine(Directory.GetCurrentDirectory());
 
         window.Load += () => {
-            shaderProgram = ShaderProgram.LoadShaderProgram("vertex_shader3.glsl", "fragment_shader3.glsl");
+            shaderProgram = _ShaderProgram.LoadShaderProgram("vertex_shader2.glsl", "fragment_shader2.glsl");
 
             
             vao = GL.GenVertexArray();
@@ -129,7 +130,7 @@ static public class Program
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
-            Texture texture1 = new Texture("Textures/container.jpg");
+            _Texture texture1 = new _Texture("Textures/container.jpg");
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, texture1.Width, texture1.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texture1.PixelData);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -146,7 +147,7 @@ static public class Program
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
-            Texture texture2 = new Texture("Textures/awesomeface.png");
+            _Texture texture2 = new _Texture("Textures/awesomeface.png");
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, texture2.Width, texture2.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texture2.PixelData);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -172,7 +173,23 @@ static public class Program
             GL.BindTexture(TextureTarget.Texture2D, textures[1]);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram.Id, "ourTexture2"), 1);
 
+            #region трансформации
+            Matrix4 model;// = Matrix4.Identity;
+            Vector3 vector3 = new Vector3(0.3f, -0.3f, 0.0f);
+            Matrix4 translationMatrix;
+            Matrix4.CreateTranslation(in vector3, out translationMatrix);
 
+            float val3 = (float)Math.Sin(GetTimeInFloat()) / 2f + 0.5f;
+            float val4 = (float)GetTimeInFloat();
+            Matrix4 rotationMatrixZ, rotationMatrixY;
+            Matrix4.CreateRotationZ(val4, out rotationMatrixZ);
+            Matrix4.CreateRotationY(-val4, out rotationMatrixY);
+
+            model = rotationMatrixZ * rotationMatrixY * translationMatrix;
+
+            int matrixLocation = GL.GetUniformLocation(shaderProgram.Id, "model");
+            GL.UniformMatrix4(matrixLocation, false, ref model);
+            #endregion
 
 
             float val = (float)(Math.Sin(DateTime.Now.Ticks / 10000000.0) / 2 + 0.5);
@@ -193,5 +210,11 @@ static public class Program
 
         window.Run();
 
+    }
+
+    private static double GetTimeInFloat()
+    {
+        var time = DateTime.Now;
+        return (double)((time.Minute * 60 + time.Second) * 1000 + time.Millisecond) / 1000.0;
     }
 }

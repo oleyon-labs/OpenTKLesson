@@ -7,6 +7,7 @@ using OpenTK.Windowing.Common;
 using static MyApp.Program;
 using OpenTK.Mathematics;
 using OpenTKExtension;
+using System.Globalization;
 
 namespace Praktika;
 
@@ -17,6 +18,11 @@ class Program
     {
         Directory.SetCurrentDirectory("../../../");
         Console.WriteLine(Directory.GetCurrentDirectory());
+
+
+
+        Simple3DObject simple3DObject = new Simple3DObject("2D figure 4.obj");
+
 
 
         GameWindowSettings gws = GameWindowSettings.Default;
@@ -57,7 +63,7 @@ class Program
         int[] VAOs = new int[10];
 
 
-        ShaderProgram[] shaderPrograms =
+        _ShaderProgram[] shaderPrograms =
         {
             null, null, null
         };
@@ -194,9 +200,9 @@ class Program
 
         window.Load += () =>
         {
-            shaderPrograms[0] = ShaderProgram.LoadShaderProgram("vertex_shader3.glsl", "fragment_shader3.glsl");
-            shaderPrograms[1] = ShaderProgram.LoadShaderProgram("VS.glsl", "FS2.glsl");
-            shaderPrograms[2] = ShaderProgram.LoadShaderProgram("VSCube.glsl", "FSCube.glsl");
+            shaderPrograms[0] = _ShaderProgram.LoadShaderProgram("vertex_shader3.glsl", "fragment_shader3.glsl");
+            shaderPrograms[1] = _ShaderProgram.LoadShaderProgram("VS.glsl", "FS2.glsl");
+            shaderPrograms[2] = _ShaderProgram.LoadShaderProgram("VSCube.glsl", "FSCube.glsl");
             #region старые треугольники
             VAOs[0] = GL.GenVertexArray();
             VBOs[0] = GL.GenBuffer();
@@ -299,7 +305,7 @@ class Program
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
-            Texture texture1 = new Texture("Textures/texture.png");
+            _Texture texture1 = new _Texture("Textures/texture.png");
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, texture1.Width, texture1.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texture1.PixelData);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, 0);
@@ -316,7 +322,7 @@ class Program
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
-            Texture texture2 = new Texture("Textures/texture1.jpg");
+            _Texture texture2 = new _Texture("Textures/texture1.jpg");
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, texture2.Width, texture2.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, texture2.PixelData);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, 0);

@@ -7,31 +7,31 @@ using System.Threading.Tasks;
 
 namespace OpenTKExtension
 {
-    public class ShaderProgram
+    public class _ShaderProgram
     {
         public int Id { get; private set; }
         public string Name { get; }
 
         public bool IsLoaded { get; private set; }
 
-        ShaderProgram(int id, string name)
+        _ShaderProgram(int id, string name)
         {
             Id = id;
             Name = name;
             IsLoaded = true;
         }
-        public static ShaderProgram LoadShaderProgram(string vertexShaderLocation, string fragmentShaderLocation, string shaderProgramName = "")
+        public static _ShaderProgram LoadShaderProgram(string vertexShaderLocation, string fragmentShaderLocation, string shaderProgramName = "")
         {
             int shaderProgramId = GL.CreateProgram();
-            Shader vertexShader = Shader.LoadShader(vertexShaderLocation, ShaderType.VertexShader);
-            Shader fragmentShader = Shader.LoadShader(fragmentShaderLocation, ShaderType.FragmentShader);
+            _Shader vertexShader = _Shader.LoadShader(vertexShaderLocation, ShaderType.VertexShader);
+            _Shader fragmentShader = _Shader.LoadShader(fragmentShaderLocation, ShaderType.FragmentShader);
             GL.AttachShader(shaderProgramId, vertexShader.Id);
             GL.AttachShader(shaderProgramId, fragmentShader.Id);
             GL.LinkProgram(shaderProgramId);
             GL.DetachShader(shaderProgramId, vertexShader.Id);
             GL.DetachShader(shaderProgramId, fragmentShader.Id);
-            Shader.DeleteShader(vertexShader);
-            Shader.DeleteShader(fragmentShader);
+            _Shader.DeleteShader(vertexShader);
+            _Shader.DeleteShader(fragmentShader);
 
             string infoLog = GL.GetProgramInfoLog(shaderProgramId);
 
@@ -41,7 +41,7 @@ namespace OpenTKExtension
             {
                 throw new Exception(infoLog);
             }
-            return new ShaderProgram(shaderProgramId, shaderProgramName) ;
+            return new _ShaderProgram(shaderProgramId, shaderProgramName) ;
         }
     }
 }
