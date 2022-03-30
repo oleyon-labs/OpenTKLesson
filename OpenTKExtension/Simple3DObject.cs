@@ -16,6 +16,30 @@ namespace OpenTKExtension
         public uint[] TexturesIndices;
         public uint[] NormalsIndices;
         public string Name;
+
+        public (float[] verts, float[] tex, float[] norms) ConvertWithoutIndices()
+        {
+            int count = VerticesIndices.Length;
+            float[] verts = new float[count*3];
+            float[] tex = new float[count*2];
+            float[] norms = new float[count*3];
+            for (int i = 0; i < count; i++)
+            {
+                verts[i*3] = Vertices[VerticesIndices[i]*3];
+                norms[i*3] = Normals[NormalsIndices[i]*3];
+                tex[i*2] = Textures[TexturesIndices[i]*2];
+
+                verts[i*3+1] = Vertices[VerticesIndices[i]*3+1];
+                norms[i*3+1] = Normals[NormalsIndices[i]*3+1];
+                tex[i*2+1] = Textures[TexturesIndices[i]*2+1];
+
+                verts[i*3+2] = Vertices[VerticesIndices[i]*3+2];
+                norms[i*3+2] = Normals[NormalsIndices[i]*3+2];
+            }
+            return (verts, tex, norms);
+        }
+
+
         public Simple3DObject(string filePath)
         {
 

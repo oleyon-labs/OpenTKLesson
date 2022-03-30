@@ -14,7 +14,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsharpProject", "CsharpProj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTKExtension", "OpenTKExtension\OpenTKExtension.csproj", "{A8E71B96-5663-43D8-ABD2-12010E0D8751}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTkPractice", "OpenTkPractice\OpenTkPractice.csproj", "{3B220996-1DD4-444A-907C-0FBDFFE19B1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTkPractice", "OpenTkPractice\OpenTkPractice.csproj", "{3B220996-1DD4-444A-907C-0FBDFFE19B1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CubeMap", "CubeMap\CubeMap.csproj", "{9F348FD6-E381-44FE-94EB-30EFE3CF328B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +88,18 @@ Global
 		{3B220996-1DD4-444A-907C-0FBDFFE19B1E}.Release|x64.Build.0 = Release|Any CPU
 		{3B220996-1DD4-444A-907C-0FBDFFE19B1E}.Release|x86.ActiveCfg = Release|Any CPU
 		{3B220996-1DD4-444A-907C-0FBDFFE19B1E}.Release|x86.Build.0 = Release|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Debug|x64.Build.0 = Debug|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Debug|x86.Build.0 = Debug|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Release|x64.ActiveCfg = Release|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Release|x64.Build.0 = Release|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Release|x86.ActiveCfg = Release|Any CPU
+		{9F348FD6-E381-44FE-94EB-30EFE3CF328B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
